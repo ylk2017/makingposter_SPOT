@@ -1,0 +1,1715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SPOT — Editable A0 PowerPoint Poster</title>
+<style>
+  :root {
+    --navy: #142d4e;
+    --blue: #2864b4;
+    --teal: #087f8c;
+    --green: #337b54;
+    --orange: #bf641a;
+    --border: #d5deea;
+    --muted: #52637a;
+    --background: #f3f6fa;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    color: var(--navy);
+    background: var(--background);
+    line-height: 1.5;
+  }
+  main {
+    max-width: 1200px;
+    margin: auto;
+    padding: 28px 20px 60px;
+  }
+  h1 { font-size: 30px; margin: 0 0 10px; }
+  h2 { font-size: 21px; margin: 0 0 15px; }
+  h3 { font-size: 17px; margin: 0 0 8px; }
+  p { margin: 8px 0 14px; }
+  section, .asset-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 22px;
+    margin-bottom: 20px;
+  }
+  label {
+    display: block;
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+  input[type="text"], input[type="number"], textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #aebdd0;
+    border-radius: 5px;
+    font: inherit;
+    background: white;
+    color: var(--navy);
+  }
+  textarea { min-height: 88px; resize: vertical; }
+  input[type="file"] { width: 100%; margin-bottom: 12px; }
+  input[type="checkbox"] { margin-right: 7px; }
+  .metadata-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .full { grid-column: 1 / -1; }
+  .help, .small { font-size: 13px; color: var(--muted); }
+  .notice {
+    background: #edf4fd;
+    border-left: 4px solid var(--blue);
+    padding: 12px 15px;
+    margin: 16px 0;
+  }
+  .warning {
+    background: #fff5e8;
+    border-left: 4px solid var(--orange);
+    padding: 12px 15px;
+  }
+  .asset-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .asset-card { margin: 0; min-width: 0; }
+  .asset-card:last-child { grid-column: 1 / -1; }
+  .asset-card img {
+    width: 100%;
+    height: 235px;
+    object-fit: contain;
+    background: #eef2f7;
+    border: 1px solid var(--border);
+    display: block;
+    margin: 10px 0;
+  }
+  .asset-card img[hidden] { display: none; }
+  .empty-preview {
+    background: #eef2f7;
+    border: 1px dashed #9baec4;
+    padding: 35px 15px;
+    text-align: center;
+    color: var(--muted);
+    margin: 10px 0;
+  }
+  .crop-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .crop-grid label { font-size: 12px; }
+  .crop-grid input { padding: 7px; }
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin: 12px 0;
+  }
+  button {
+    font: inherit;
+    border: 0;
+    border-radius: 6px;
+    padding: 11px 17px;
+    cursor: pointer;
+    background: var(--navy);
+    color: white;
+  }
+  button.secondary {
+    background: #e9eff6;
+    color: var(--navy);
+    border: 1px solid var(--border);
+  }
+  button:disabled { opacity: .55; cursor: not-allowed; }
+  #exportButton { font-weight: bold; padding: 15px 24px; }
+  #status {
+    white-space: pre-wrap;
+    padding: 14px;
+    background: #edf2f8;
+    border-radius: 6px;
+    min-height: 52px;
+    margin-top: 14px;
+  }
+  #status.error { background: #fff0ef; color: #8e2420; }
+  #status.success { background: #eef8f0; color: #24623c; }
+  #checklist { padding-left: 23px; }
+  #checklist li { margin-bottom: 5px; }
+  .review-list label {
+    font-weight: normal;
+    font-size: 14px;
+    margin: 8px 0;
+  }
+  .pill {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: bold;
+    background: #e9eff7;
+    padding: 3px 9px;
+    border-radius: 12px;
+    margin-left: 8px;
+  }
+  details { margin-top: 12px; }
+  summary { cursor: pointer; font-weight: bold; }
+  .asset-message { min-height: 22px; }
+  .dependency { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .busy-banner { display: none; }
+  body.busy .busy-banner { display: block; }
+  @media (max-width: 760px) {
+    .metadata-grid, .asset-grid { grid-template-columns: 1fr; }
+    .asset-card:last-child { grid-column: auto; }
+    main { padding: 20px 12px 40px; }
+    h1 { font-size: 25px; }
+    section, .asset-card { padding: 17px; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>SPOT — Editable A0 Poster Generator</h1>
+  <p>
+    Create a one-slide, portrait A0 PowerPoint with editable text,
+    shapes, arrows and captions. Original classroom evidence remains
+    embedded as images.
+  </p>
+
+  <div class="notice">
+    <strong>Local image processing:</strong>
+    uploaded evidence stays in this browser session.
+    Internet access is required to load the pinned PptxGenJS library.
+    There is no server-side processing or automatic session saving.
+  </div>
+
+  <section>
+    <h2>1. Poster details</h2>
+    <div class="metadata-grid">
+      <div class="full">
+        <label for="posterTitle">Poster title</label>
+        <input id="posterTitle" type="text"
+          value="SPOT: Making Physics Learning Visible">
+      </div>
+      <div>
+        <label for="author">Author</label>
+        <input id="author" type="text" placeholder="Enter confirmed author name">
+      </div>
+      <div>
+        <label for="affiliation">Affiliation</label>
+        <input id="affiliation" type="text"
+          placeholder="Enter confirmed school / affiliation">
+      </div>
+    </div>
+    <p class="help">
+      Missing author details are exported as visible placeholders.
+      Long titles or affiliations may require shortening.
+    </p>
+  </section>
+
+  <section>
+    <h2>2. Authentic classroom evidence</h2>
+    <p>
+      Use pre-cropped PNG or JPEG images, or adjust the crop controls below.
+      Crop coordinates are percentages of the original image.
+      Images are fitted proportionally, never stretched.
+    </p>
+    <div class="warning">
+      <strong>Keep the examples separate.</strong>
+      Use the matched initial/revised pair from the before/after document.
+      Do not substitute the unrelated first-attempt photograph from the
+      chatbot example. Exclude the percentage infographic from the
+      Error Detective crop.
+    </div>
+    <p class="help">
+      Cropping only selects original image pixels. It does not reconstruct
+      handwriting or improve resolution. Review each selected crop.
+    </p>
+    <div id="assetGrid" class="asset-grid"></div>
+  </section>
+
+  <section>
+    <h2>3. Editable captions</h2>
+    <div class="metadata-grid">
+      <div>
+        <label for="captionSimulation">Simulation</label>
+        <textarea id="captionSimulation"></textarea>
+      </div>
+      <div>
+        <label for="captionAI">AI feedback</label>
+        <textarea id="captionAI"></textarea>
+      </div>
+      <div>
+        <label for="captionError">Error Detective</label>
+        <textarea id="captionError"></textarea>
+      </div>
+      <div>
+        <label for="captionRevision">Matched before/after pair</label>
+        <textarea id="captionRevision"></textarea>
+      </div>
+    </div>
+    <p class="help">
+      Keep captions concise. Export stops if the text-size estimate detects
+      a likely overflow; body text is not silently reduced.
+    </p>
+  </section>
+
+  <section>
+    <h2>4. Export checks</h2>
+    <div class="dependency">
+      <strong id="libraryStatus">Loading PowerPoint library…</strong>
+      <button id="retryLibrary" type="button" class="secondary">Retry library</button>
+    </div>
+    <ul id="checklist"></ul>
+    <div class="row">
+      <button id="exportButton" type="button" disabled>
+        Download editable PPTX
+      </button>
+    </div>
+    <p class="busy-banner help">Generating the PowerPoint. Please wait…</p>
+    <div id="status" role="status" aria-live="polite">
+      Enter metadata and upload evidence, or export with clearly marked placeholders.
+    </div>
+  </section>
+
+  <section>
+    <h2>5. Final manual review</h2>
+    <p class="help">
+      Geometry and text estimates cannot fully validate PowerPoint rendering.
+      Inspect the exported PPTX before submission.
+    </p>
+    <div id="manualChecklist" class="review-list"></div>
+    <p class="warning">
+      This application exports PPTX only. It does not certify CMYK colour,
+      print readiness, image legibility, or compliance of an exported PDF.
+      Check the PDF separately against submission requirements.
+    </p>
+  </section>
+</main>
+
+<script>
+"use strict";
+
+/* ==========================================================
+   1. CONFIGURATION
+   All PowerPoint positions and dimensions are in inches.
+   ========================================================== */
+
+const CONFIG = {
+  width: 841 / 25.4,
+  height: 1189 / 25.4,
+  margin: 0.90,
+  gutter: 0.55,
+  filename: "SPOT_A0_Editable_Poster.pptx",
+  font: "Arial",
+  library:
+    "https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js",
+  minRecommendedPpi: 120,
+  colors: {
+    navy: "142D4E",
+    body: "253C55",
+    muted: "52637A",
+    line: "D5DEEA",
+    pale: "F3F6FA",
+    white: "FFFFFF",
+    S: "2864B4",
+    P: "087F8C",
+    O: "337B54",
+    T: "BF641A",
+    lightS: "EDF3FC",
+    lightP: "EAF6F7",
+    lightO: "EFF7F1",
+    lightT: "FFF4E9"
+  }
+};
+
+CONFIG.contentWidth = CONFIG.width - 2 * CONFIG.margin;
+CONFIG.columnWidth =
+  (CONFIG.contentWidth - 2 * CONFIG.gutter) / 3;
+CONFIG.columns = [0, 1, 2].map(i =>
+  CONFIG.margin + i * (CONFIG.columnWidth + CONFIG.gutter)
+);
+
+/* ==========================================================
+   2. POSTER CONTENT
+   Edit wording here without changing the layout functions.
+   ========================================================== */
+
+const CONTENT = {
+  title: "SPOT: Making Physics Learning Visible",
+  subtitle:
+    "Teacher-Designed Simulations, Guided AI Checking\n" +
+    "and Error-Informed Follow-Up",
+  strapline:
+    "Make the first attempt visible.\n" +
+    "Probe the reasoning. Track the revision.",
+  context:
+    "30 Form 5 Physics students | Projectile motion · Moments · Ideal gas law",
+
+  whyHeading: "Why SPOT?",
+  why:
+    "Final answers can hide the learning process. SPOT addresses four " +
+    "visibility gaps: abstract phenomena, student reasoning, recurring " +
+    "difficulties, and changes across attempts.",
+
+  preparationHeading: "Teacher Preparation",
+  preparationSteps: [
+    "Identify the conceptual difficulty",
+    "Develop simulation ideas with AI",
+    "Configure guided checking on goodclass.ai",
+    "Prepare tasks and diagnostic categories"
+  ],
+  preparationNote:
+    "The teacher sets the learning goals and feedback boundaries. " +
+    "Students construct an initial solution before receiving guided checking.",
+
+  frameworkHeading: "The SPOT Framework",
+  stages: [
+    {
+      letter: "S",
+      title: "Simulate Phenomena",
+      body:
+        "Make physics relationships visible and verify calculated models."
+    },
+    {
+      letter: "P",
+      title: "Probe Thinking",
+      body:
+        "Use focused hints and questions to check the first attempt, " +
+        "rather than supply the final answer."
+    },
+    {
+      letter: "O",
+      title: "Observe Learning Status",
+      body:
+        "Identify individual difficulties and recurring error patterns."
+    },
+    {
+      letter: "T",
+      title: "Track Effort, Participation and Growth",
+      body:
+        "Record attempts and compare revisions in student models."
+    }
+  ],
+  implementation:
+    "Implemented in projectile motion, moments and the ideal gas law; " +
+    "further topics are planned.",
+
+  evidenceHeading: "Classroom Evidence",
+  separateExamples:
+    "The following panels show separate classroom examples, " +
+    "not one student’s continuous learning record.",
+
+  simulationHeading: "A  Calculate First, Then Verify",
+  simulationLabel: "S — Simulation-based verification",
+  captionSimulation:
+    "Students test a calculated launch speed against the displayed " +
+    "trajectory and target. The interface provides attempt feedback.",
+
+  aiHeading: "B  Feedback That Requests Thinking",
+  aiQuote:
+    "“Can you rewrite just the vertical equation with the correct sign?”",
+  aiLabel: "P — Guided checking",
+  captionAI:
+    "The displayed response identifies an inconsistent gravity sign, " +
+    "offers a conceptual hint and requests a revision. It does not " +
+    "provide the final numerical answer.",
+
+  errorHeading: "C  Name the Error",
+  errorLabel: "O — Error diagnosis",
+  captionError:
+    "The student identifies a direction/sign error using a structured " +
+    "diagnostic worksheet.",
+  categories: [
+    "Height / displacement",
+    "Formula / model",
+    "Direction / sign",
+    "Shared time",
+    "Algebra / calculation"
+  ],
+  errorNote:
+    "Teacher analysis of actual student chat records also informs " +
+    "the identification of recurring errors.",
+
+  revisionHeading: "D  Track a Specific Revision",
+  initialLabel: "Initial model",
+  revisedLabel: "Revised model",
+  revisionLabel: "T — Documented revision",
+  captionRevision:
+    "The paired work shows a change from a positive to a negative " +
+    "gravitational term, consistent with taking upward as positive.",
+  equation: "Upward positive: aᵧ = −9.81 m s⁻²",
+  revisionBoundary:
+    "This documents a targeted correction, not an entirely error-free " +
+    "solution or proof of long-term mastery.",
+
+  followupHeading: "Close the Feedback Loop",
+  followup:
+    "Around 10 minutes before the lesson ends, students use simulation " +
+    "to verify their models. The teacher concludes by discussing one " +
+    "of the most common errors.",
+  followupSteps: [
+    "Attempts", "Error evidence", "Teacher discussion", "Revision"
+  ],
+
+  takeaway:
+    "SPOT makes learning evidence visible so that feedback and " +
+    "teacher follow-up can be better targeted.",
+  responsibility:
+    "AI supports checking; students retain responsibility for thinking, " +
+    "and teachers retain responsibility for judgement.",
+  source:
+    "Teacher-developed classroom practice. Evidence: anonymised student " +
+    "artefacts and teacher analysis of chat records. The examples do not " +
+    "establish causal AI effects or long-term gains."
+};
+
+const ASSET_SPECS = [
+  {
+    id: "simulationImage",
+    title: "Simulation screenshot",
+    letter: "S",
+    note:
+      "Use the original simulation screenshot, retaining trajectory, " +
+      "target and relevant feedback."
+  },
+  {
+    id: "aiFeedbackImage",
+    title: "AI conversation",
+    letter: "P",
+    note:
+      "Crop to the AI response if using the tall composite. " +
+      "Keep the sign-convention explanation and checking question."
+  },
+  {
+    id: "errorDetectiveImage",
+    title: "Error Detective worksheet",
+    letter: "O",
+    note:
+      "Retain the circled Direction Check. Exclude the percentage " +
+      "infographic and surrounding document text."
+  },
+  {
+    id: "initialModelImage",
+    title: "Initial model — matched pair",
+    letter: "T",
+    note:
+      "Use the upper student-work photograph from the before/after document, " +
+      "not the separate chatbot first-attempt photograph."
+  },
+  {
+    id: "revisedModelImage",
+    title: "Revised model — matched pair",
+    letter: "T",
+    note:
+      "Use the lower MY IMPROVED MODEL photograph from the same " +
+      "before/after document."
+  }
+];
+
+/* Intended evidence container sizes used for resolution estimates. */
+const IMAGE_BOXES = {
+  simulationImage: { w: CONFIG.columnWidth - 0.48, h: 7.00 },
+  aiFeedbackImage: { w: CONFIG.columnWidth - 0.48, h: 13.30 },
+  errorDetectiveImage: { w: CONFIG.columnWidth - 0.48, h: 5.60 },
+  initialModelImage: { w: CONFIG.columnWidth - 0.48, h: 4.70 },
+  revisedModelImage: { w: CONFIG.columnWidth - 0.48, h: 3.80 }
+};
+
+const MANUAL_CHECKS = [
+  "Slide dimensions are A0 portrait: 841 × 1189 mm.",
+  "Headings, paragraphs, diagrams, labels and captions are editable.",
+  "Body text and captions are readable at poster size.",
+  "No text is clipped, overflowing or unexpectedly rewrapped.",
+  "Equations show the correct signs, subscripts and units.",
+  "Images are proportionate, legible and cropped appropriately.",
+  "Separate classroom examples are not shown as one student’s journey.",
+  "No unsupported percentages or numerical findings have been added.",
+  "Author and affiliation have been confirmed.",
+  "The exported PDF has been checked against submission requirements."
+];
+
+/* ==========================================================
+   3. APPLICATION STATE AND INTERFACE
+   ========================================================== */
+
+const $ = id => document.getElementById(id);
+
+const state = {
+  assets: Object.fromEntries(
+    ASSET_SPECS.map(spec => [spec.id, {
+      original: null,
+      processed: null,
+      name: "",
+      approved: false,
+      version: 0,
+      loading: false,
+      error: ""
+    }])
+  ),
+  libraryReady: false,
+  busy: false,
+  diagnostics: []
+};
+
+function setStatus(message, type = "") {
+  $("status").textContent = message;
+  $("status").className = type;
+}
+
+function element(tag, text, className) {
+  const node = document.createElement(tag);
+  if (text !== undefined) node.textContent = text;
+  if (className) node.className = className;
+  return node;
+}
+
+function initialiseInterface() {
+  $("posterTitle").value = CONTENT.title;
+
+  [
+    ["captionSimulation", "captionSimulation"],
+    ["captionAI", "captionAI"],
+    ["captionError", "captionError"],
+    ["captionRevision", "captionRevision"]
+  ].forEach(([id, key]) => {
+    $(id).value = CONTENT[key];
+  });
+
+  for (const spec of ASSET_SPECS) {
+    const card = element("article", undefined, "asset-card");
+    card.id = spec.id + "-card";
+
+    const heading = element("h3", spec.title);
+    heading.appendChild(element("span", spec.letter, "pill"));
+    card.appendChild(heading);
+    card.appendChild(element("p", spec.note, "help"));
+
+    const fileLabel = element("label", "Choose PNG or JPEG");
+    fileLabel.htmlFor = spec.id;
+    card.appendChild(fileLabel);
+
+    const file = document.createElement("input");
+    file.type = "file";
+    file.id = spec.id;
+    file.accept = "image/png,image/jpeg";
+    file.addEventListener("change", () => loadAsset(spec.id, file.files[0]));
+    card.appendChild(file);
+
+    const empty = element("div", "No image selected — editable placeholder will be exported.",
+      "empty-preview");
+    empty.id = spec.id + "-empty";
+    card.appendChild(empty);
+
+    const preview = document.createElement("img");
+    preview.id = spec.id + "-preview";
+    preview.alt = spec.title + " — selected crop";
+    preview.hidden = true;
+    card.appendChild(preview);
+
+    const message = element("div", "", "help asset-message");
+    message.id = spec.id + "-message";
+    card.appendChild(message);
+
+    const details = document.createElement("details");
+    details.appendChild(element("summary", "Optional manual crop"));
+
+    details.appendChild(element("p",
+      "Percentages of the original image. Left + width and top + height " +
+      "must not exceed 100. Inspect the preview after changing a crop.", "help"));
+
+    const cropGrid = element("div", undefined, "crop-grid");
+
+    [
+      ["left", "Left %", 0],
+      ["top", "Top %", 0],
+      ["width", "Width %", 100],
+      ["height", "Height %", 100]
+    ].forEach(([key, labelText, value]) => {
+      const wrap = document.createElement("div");
+      const label = element("label", labelText);
+      label.htmlFor = spec.id + "-" + key;
+      const input = document.createElement("input");
+      input.type = "number";
+      input.id = label.htmlFor;
+      input.min = key === "width" || key === "height" ? "0.1" : "0";
+      input.max = "100";
+      input.step = "0.1";
+      input.value = value;
+      input.addEventListener("input", () => processAsset(spec.id));
+      wrap.append(label, input);
+      cropGrid.appendChild(wrap);
+    });
+
+    details.appendChild(cropGrid);
+
+    const cropButtons = element("div", undefined, "row");
+    const reset = element("button", "Reset crop", "secondary");
+    reset.type = "button";
+    reset.addEventListener("click", () => {
+      resetCrop(spec.id);
+      processAsset(spec.id);
+    });
+    const remove = element("button", "Remove image", "secondary");
+    remove.type = "button";
+    remove.addEventListener("click", () => removeAsset(spec.id));
+    cropButtons.append(reset, remove);
+    details.appendChild(cropButtons);
+    card.appendChild(details);
+
+    const approvalLabel = element("label");
+    approvalLabel.style.fontWeight = "normal";
+    const approval = document.createElement("input");
+    approval.type = "checkbox";
+    approval.id = spec.id + "-approved";
+    approval.addEventListener("change", () => {
+      state.assets[spec.id].approved = approval.checked;
+      updateChecklist();
+    });
+    approvalLabel.append(
+      approval,
+      document.createTextNode("I have inspected this image/crop for relevance and anonymity.")
+    );
+    card.appendChild(approvalLabel);
+
+    $("assetGrid").appendChild(card);
+  }
+
+  for (const text of MANUAL_CHECKS) {
+    const label = element("label");
+    const check = document.createElement("input");
+    check.type = "checkbox";
+    label.append(check, document.createTextNode(text));
+    $("manualChecklist").appendChild(label);
+  }
+
+  ["posterTitle", "author", "affiliation"].forEach(id =>
+    $(id).addEventListener("input", updateChecklist)
+  );
+
+  $("exportButton").addEventListener("click", exportPoster);
+  $("retryLibrary").addEventListener("click", () => loadLibrary(true));
+  updateChecklist();
+}
+
+function resetCrop(id) {
+  ["left", "top", "width", "height"].forEach(key => {
+    $(id + "-" + key).value =
+      key === "width" || key === "height" ? 100 : 0;
+  });
+}
+
+function removeAsset(id) {
+  const oldVersion = state.assets[id].version;
+  state.assets[id] = {
+    original: null,
+    processed: null,
+    name: "",
+    approved: false,
+    version: oldVersion + 1,
+    loading: false,
+    error: ""
+  };
+  $(id).value = "";
+  $(id + "-approved").checked = false;
+  $(id + "-preview").hidden = true;
+  $(id + "-preview").removeAttribute("src");
+  $(id + "-empty").hidden = false;
+  $(id + "-message").textContent = "";
+  resetCrop(id);
+  updateChecklist();
+}
+
+/* ==========================================================
+   4. LOCAL IMAGE LOADING AND AUTHENTIC CROPPING
+   Canvas is used only to crop original raster evidence and
+   measure text; never to rasterise poster diagrams or text.
+   ========================================================== */
+
+function readFile(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(new Error("Unable to read the selected file."));
+    reader.readAsDataURL(file);
+  });
+}
+
+function decodeImage(data) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error("Unable to decode the image."));
+    img.src = data;
+  });
+}
+
+async function loadAsset(id, file) {
+  if (!file) return;
+  const asset = state.assets[id];
+  const token = ++asset.version;
+
+  asset.loading = true;
+  asset.error = "";
+  asset.approved = false;
+  asset.processed = null;
+  asset.original = null;
+  $(id + "-approved").checked = false;
+  $(id + "-preview").hidden = true;
+  $(id + "-empty").hidden = false;
+  $(id + "-message").textContent = "Reading image…";
+  updateChecklist();
+
+  try {
+    if (!/\.(png|jpe?g)$/i.test(file.name)) {
+      throw new Error("Please choose a PNG or JPEG image.");
+    }
+
+    const data = await readFile(file);
+    const img = await decodeImage(data);
+    if (token !== asset.version) return;
+
+    asset.original = {
+      data,
+      img,
+      width: img.naturalWidth,
+      height: img.naturalHeight
+    };
+    asset.name = file.name;
+    asset.loading = false;
+    resetCrop(id);
+    await processAsset(id);
+  } catch (error) {
+    if (token !== asset.version) return;
+    asset.loading = false;
+    asset.error = error.message;
+    $(id + "-message").textContent = error.message;
+    setStatus(error.message, "error");
+    updateChecklist();
+  }
+}
+
+function cropValues(id) {
+  const crop = {};
+  for (const key of ["left", "top", "width", "height"]) {
+    crop[key] = Number($(id + "-" + key).value);
+    if (!Number.isFinite(crop[key])) {
+      throw new Error("Crop values must be valid numbers.");
+    }
+  }
+  if (
+    crop.left < 0 || crop.top < 0 ||
+    crop.width <= 0 || crop.height <= 0 ||
+    crop.left + crop.width > 100.001 ||
+    crop.top + crop.height > 100.001
+  ) {
+    throw new Error("Invalid crop: keep the selected rectangle within 0–100%.");
+  }
+  return crop;
+}
+
+async function processAsset(id) {
+  const asset = state.assets[id];
+  if (!asset.original) return;
+
+  const token = ++asset.version;
+  asset.loading = true;
+  asset.error = "";
+  asset.approved = false;
+  asset.processed = null;
+  $(id + "-approved").checked = false;
+
+  try {
+    const crop = cropValues(id);
+    const source = asset.original;
+
+    const sx = Math.floor(source.width * crop.left / 100);
+    const sy = Math.floor(source.height * crop.top / 100);
+    const sw = Math.min(
+      source.width - sx,
+      Math.max(1, Math.round(source.width * crop.width / 100))
+    );
+    const sh = Math.min(
+      source.height - sy,
+      Math.max(1, Math.round(source.height * crop.height / 100))
+    );
+
+    let data;
+    const wholeImage =
+      crop.left === 0 && crop.top === 0 &&
+      crop.width === 100 && crop.height === 100;
+
+    if (wholeImage) {
+      data = source.data;
+    } else {
+      const canvas = document.createElement("canvas");
+      canvas.width = sw;
+      canvas.height = sh;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("This browser cannot crop images.");
+      // Same pixel dimensions: no enlargement or enhancement.
+      ctx.drawImage(source.img, sx, sy, sw, sh, 0, 0, sw, sh);
+      data = canvas.toDataURL("image/png");
+      if (data === "data:,") throw new Error("The selected crop is too large for this browser.");
+      canvas.width = 1;
+      canvas.height = 1;
+    }
+
+    if (token !== asset.version) return;
+
+    asset.processed = { data, width: sw, height: sh };
+    asset.loading = false;
+
+    $(id + "-preview").src = data;
+    $(id + "-preview").hidden = false;
+    $(id + "-empty").hidden = true;
+
+    const ppi = imagePpi(id, asset.processed);
+    $(id + "-message").textContent =
+      `${asset.name}: selected pixels ${sw} × ${sh}; ` +
+      `approximately ${Math.round(ppi)} PPI at the planned display size.` +
+      (ppi < CONFIG.minRecommendedPpi
+        ? " Low-resolution warning: inspect handwriting and small text carefully."
+        : " Inspect small text at the final poster size.");
+
+    updateChecklist();
+  } catch (error) {
+    if (token !== asset.version) return;
+    asset.loading = false;
+    asset.error = error.message;
+    $(id + "-preview").hidden = true;
+    $(id + "-empty").hidden = false;
+    $(id + "-message").textContent = error.message;
+    updateChecklist();
+  }
+}
+
+function containedSize(pixelWidth, pixelHeight, boxWidth, boxHeight) {
+  const scale = Math.min(boxWidth / pixelWidth, boxHeight / pixelHeight);
+  return {
+    w: pixelWidth * scale,
+    h: pixelHeight * scale
+  };
+}
+
+function imagePpi(id, image) {
+  const box = IMAGE_BOXES[id];
+  const fit = containedSize(image.width, image.height, box.w, box.h);
+  return Math.min(image.width / fit.w, image.height / fit.h);
+}
+
+/* ==========================================================
+   5. LIBRARY LOADING, CHECKLISTS AND WARNINGS
+   ========================================================== */
+
+let libraryPromise = null;
+
+function loadLibrary(force = false) {
+  if (typeof window.PptxGenJS === "function") {
+    state.libraryReady = true;
+    $("libraryStatus").textContent = "PptxGenJS ready.";
+    updateChecklist();
+    return Promise.resolve();
+  }
+
+  if (libraryPromise && !force) return libraryPromise;
+
+  $("libraryStatus").textContent = "Loading PptxGenJS 4.0.1…";
+  state.libraryReady = false;
+
+  libraryPromise = new Promise((resolve, reject) => {
+    const old = document.getElementById("pptx-library");
+    if (old) old.remove();
+
+    const script = document.createElement("script");
+    script.id = "pptx-library";
+    script.src = CONFIG.library;
+    script.async = true;
+
+    const timeout = setTimeout(() => {
+      script.remove();
+      reject(new Error("Library loading timed out. Check your internet connection."));
+    }, 30000);
+
+    script.onload = () => {
+      clearTimeout(timeout);
+      if (typeof window.PptxGenJS !== "function") {
+        reject(new Error("The library loaded but PptxGenJS was not found."));
+      } else {
+        resolve();
+      }
+    };
+
+    script.onerror = () => {
+      clearTimeout(timeout);
+      reject(new Error("Unable to load PptxGenJS. Check internet access or CDN restrictions."));
+    };
+
+    document.head.appendChild(script);
+  }).then(() => {
+    state.libraryReady = true;
+    $("libraryStatus").textContent = "PptxGenJS 4.0.1 ready.";
+    updateChecklist();
+  }).catch(error => {
+    state.libraryReady = false;
+    libraryPromise = null;
+    $("libraryStatus").textContent = "Library unavailable.";
+    setStatus(error.message, "error");
+    updateChecklist();
+  });
+
+  return libraryPromise;
+}
+
+function collectWarnings() {
+  const warnings = [];
+
+  if (!$("author").value.trim()) {
+    warnings.push("Author missing: a visible author placeholder will be exported.");
+  }
+  if (!$("affiliation").value.trim()) {
+    warnings.push("Affiliation missing: a visible affiliation placeholder will be exported.");
+  }
+
+  for (const spec of ASSET_SPECS) {
+    const asset = state.assets[spec.id];
+    if (!asset.processed) {
+      warnings.push(`${spec.title}: no usable image; an editable placeholder will be exported.`);
+    } else {
+      if (!asset.approved) {
+        warnings.push(`${spec.title}: image/crop has not been marked as inspected.`);
+      }
+      const ppi = imagePpi(spec.id, asset.processed);
+      if (ppi < CONFIG.minRecommendedPpi) {
+        warnings.push(
+          `${spec.title}: approximately ${Math.round(ppi)} PPI; ` +
+          "small image text may not be legible."
+        );
+      }
+    }
+  }
+  return warnings;
+}
+
+function updateChecklist() {
+  const list = $("checklist");
+  list.replaceChildren();
+
+  const add = text => list.appendChild(element("li", text));
+
+  add(state.libraryReady ? "✓ PowerPoint library loaded." : "○ PowerPoint library not ready.");
+  add($("posterTitle").value.trim() ? "✓ Poster title supplied." : "○ Poster title is empty.");
+  add($("author").value.trim() ? "✓ Author supplied." : "○ Author placeholder will be used.");
+  add($("affiliation").value.trim()
+    ? "✓ Affiliation supplied."
+    : "○ Affiliation placeholder will be used.");
+
+  for (const spec of ASSET_SPECS) {
+    const asset = state.assets[spec.id];
+    let message = "○ " + spec.title + ": missing.";
+    if (asset.loading) {
+      message = "… " + spec.title + ": processing.";
+    } else if (asset.error) {
+      message = "⚠ " + spec.title + ": " + asset.error;
+    } else if (asset.processed) {
+      message =
+        (asset.approved ? "✓ " : "○ ") +
+        spec.title + (asset.approved ? ": inspected." : ": review image/crop.");
+    }
+    add(message);
+  }
+
+  const processing = Object.values(state.assets).some(asset => asset.loading);
+  $("exportButton").disabled = !state.libraryReady || state.busy || processing;
+}
+
+/* ==========================================================
+   6. NATIVE POWERPOINT DRAWING HELPERS
+   ========================================================== */
+
+function createPosterBuilder(pptx, slide) {
+  const C = CONFIG.colors;
+  const objects = [];
+  const textErrors = [];
+  const notices = [];
+
+  const measureCanvas = document.createElement("canvas");
+  const measure = measureCanvas.getContext("2d");
+  if (!measure) throw new Error("Text measurement is unavailable in this browser.");
+
+  let serial = 0;
+
+  function name(label) {
+    serial += 1;
+    return `${String(serial).padStart(3, "0")} ${label}`;
+  }
+
+  function register(label, box, role = "content") {
+    const item = { label, ...box, role };
+    objects.push(item);
+    return item;
+  }
+
+  function rect(label, x, y, w, h, fill, border = C.line, role = "background") {
+    register(label, { x, y, w, h }, role);
+    slide.addShape(pptx.ShapeType.rect, {
+      x, y, w, h,
+      rectRadius: 0,
+      fill: { color: fill },
+      line: { color: border, width: 0.8 },
+      objectName: name(label)
+    });
+  }
+
+  function line(label, x1, y1, x2, y2, color = C.line, arrow = false) {
+    const x = Math.min(x1, x2);
+    const y = Math.min(y1, y2);
+    const w = Math.abs(x2 - x1);
+    const h = Math.abs(y2 - y1);
+
+    register(label, { x, y, w, h }, "connector");
+
+    // Reversed horizontal/vertical arrows use beginArrowType,
+    // avoiding negative width/height values.
+    const reversed = x2 < x1 || y2 < y1;
+    const lineOptions = { color, width: arrow ? 1.8 : 1 };
+    if (arrow) {
+      lineOptions[reversed ? "beginArrowType" : "endArrowType"] = "triangle";
+    }
+
+    slide.addShape(pptx.ShapeType.line, {
+      x, y, w, h,
+      line: lineOptions,
+      objectName: name(label)
+    });
+  }
+
+  function wrapText(value, w, fontSize, bold) {
+    // Measuring at fontSize px against width*72 creates an equivalent
+    // relative point-based width estimate. A safety factor allows
+    // for differences between browser and PowerPoint font metrics.
+    measure.font = `${bold ? "bold " : ""}${fontSize}px ${CONFIG.font}`;
+    const maxWidth = Math.max(1, (w - 0.06) * 72 * 0.95);
+    const lines = [];
+
+    for (const paragraph of String(value).split("\n")) {
+      if (!paragraph.trim()) {
+        lines.push("");
+        continue;
+      }
+
+      let current = "";
+      for (const word of paragraph.trim().split(/\s+/)) {
+        if (measure.measureText(word).width > maxWidth) {
+          textErrors.push("An unbroken word or URL is too wide: " + word);
+        }
+        const candidate = current ? current + " " + word : word;
+        if (current && measure.measureText(candidate).width > maxWidth) {
+          lines.push(current);
+          current = word;
+        } else {
+          current = candidate;
+        }
+      }
+      if (current) lines.push(current);
+    }
+    return lines;
+  }
+
+  function text(label, value, x, y, w, h, options = {}) {
+    const fontSize = options.fontSize || 26;
+    const bold = Boolean(options.bold);
+    const lines = wrapText(value, w, fontSize, bold);
+    const estimatedHeight = lines.length * fontSize * 1.22 / 72 + 0.05;
+
+    if (estimatedHeight > h + 0.015) {
+      textErrors.push(
+        `${label}: estimated ${estimatedHeight.toFixed(2)}″ required, ` +
+        `${h.toFixed(2)}″ available. Shorten this text or enlarge its box.`
+      );
+    }
+
+    register(label, { x, y, w, h }, "content");
+
+    slide.addText(lines.join("\n"), {
+      x, y, w, h,
+      fontFace: CONFIG.font,
+      fontSize,
+      bold,
+      color: options.color || C.body,
+      margin: 0,
+      breakLine: false,
+      align: options.align || "left",
+      valign: "top",
+      lineSpacingMultiple: 1.10,
+      paraSpaceAfterPt: 0,
+      charSpacing: 0,
+      lang: "en-GB",
+      objectName: name(label)
+    });
+  }
+
+  function heading(label, value, x, y, w, color = C.navy, h = 1.05) {
+    text(label, value, x, y, w, h, {
+      fontSize: 36,
+      bold: true,
+      color
+    });
+  }
+
+  function badge(label, value, x, y, w, color, pale) {
+    rect(label + " background", x, y, w, 0.64, pale, pale);
+    text(label, value, x + 0.12, y + 0.075, w - 0.24, 0.49, {
+      fontSize: 24,
+      bold: true,
+      color
+    });
+  }
+
+  function image(label, id, x, y, w, h) {
+    rect(label + " container", x, y, w, h, C.pale, C.line);
+
+    const asset = state.assets[id].processed;
+    if (!asset) {
+      text(label + " placeholder",
+        "EVIDENCE IMAGE PLACEHOLDER\n" +
+        ASSET_SPECS.find(spec => spec.id === id).title,
+        x + 0.25, y + h / 2 - 0.65, w - 0.5, 1.30,
+        { fontSize: 24, color: C.muted, align: "center" }
+      );
+      return;
+    }
+
+    const fit = containedSize(asset.width, asset.height, w - 0.10, h - 0.10);
+    const box = {
+      x: x + (w - fit.w) / 2,
+      y: y + (h - fit.h) / 2,
+      w: fit.w,
+      h: fit.h
+    };
+
+    register(label, box, "image");
+    slide.addImage({
+      data: asset.data,
+      ...box,
+      altText: label,
+      objectName: name(label)
+    });
+  }
+
+  function checkGeometry() {
+    const errors = [];
+    const overlaps = [];
+    const tolerance = 0.015;
+
+    // Backgrounds are checked for bounds, but excluded from
+    // content-overlap warnings because containing content is intentional.
+    for (const obj of objects) {
+      if (
+        ![obj.x, obj.y, obj.w, obj.h].every(Number.isFinite) ||
+        obj.w < 0 || obj.h < 0 ||
+        obj.x < -tolerance || obj.y < -tolerance ||
+        obj.x + obj.w > CONFIG.width + tolerance ||
+        obj.y + obj.h > CONFIG.height + tolerance
+      ) {
+        errors.push("Out-of-bounds object: " + obj.label);
+      }
+    }
+
+    const content = objects.filter(obj =>
+      obj.role === "content" || obj.role === "image"
+    );
+
+    for (let i = 0; i < content.length; i++) {
+      for (let j = i + 1; j < content.length; j++) {
+        const a = content[i];
+        const b = content[j];
+        const overlapW = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
+        const overlapH = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y);
+        if (overlapW > 0.04 && overlapH > 0.04) {
+          overlaps.push("Potential overlap: " + a.label + " / " + b.label);
+        }
+      }
+    }
+
+    return {
+      errors: [...errors, ...textErrors],
+      warnings: [...overlaps, ...notices],
+      count: objects.length
+    };
+  }
+
+  return { rect, line, text, heading, badge, image, checkGeometry };
+}
+
+/* ==========================================================
+   7. POSTER LAYOUT
+   ========================================================== */
+
+function buildPoster(pptx, slide, copy, metadata) {
+  const B = createPosterBuilder(pptx, slide);
+  const C = CONFIG.colors;
+  const [x1, x2, x3] = CONFIG.columns;
+  const cw = CONFIG.columnWidth;
+  const inner = cw - 0.48;
+
+  const tx = B.text;
+  const hd = B.heading;
+
+  slide.background = { color: C.white };
+
+  /* ---------- Full-width header ---------- */
+
+  for (let i = 0; i < 4; i++) {
+    const letter = ["S", "P", "O", "T"][i];
+    B.rect(
+      "Header colour " + letter,
+      CONFIG.margin + i * CONFIG.contentWidth / 4,
+      0.90,
+      CONFIG.contentWidth / 4,
+      0.10,
+      C[letter],
+      C[letter]
+    );
+  }
+
+  tx("Poster title", metadata.title,
+    CONFIG.margin, 1.25, CONFIG.contentWidth, 1.60,
+    { fontSize: 84, bold: true, color: C.navy });
+
+  tx("Poster subtitle", copy.subtitle,
+    CONFIG.margin, 2.95, CONFIG.contentWidth, 1.28,
+    { fontSize: 36, color: C.navy });
+
+  const leftHeaderWidth = CONFIG.contentWidth * 0.52;
+  const rightHeaderX = CONFIG.margin + leftHeaderWidth + 0.50;
+  const rightHeaderWidth = CONFIG.width - CONFIG.margin - rightHeaderX;
+
+  tx("Author", metadata.author,
+    CONFIG.margin, 4.38, leftHeaderWidth, 0.57,
+    { fontSize: 28, bold: true });
+
+  tx("Affiliation", metadata.affiliation,
+    CONFIG.margin, 5.07, leftHeaderWidth, 0.60,
+    { fontSize: 26, color: C.muted });
+
+  tx("Strapline", copy.strapline,
+    rightHeaderX, 4.38, rightHeaderWidth, 1.20,
+    { fontSize: 30, bold: true, color: C.P });
+
+  tx("Classroom context", copy.context,
+    CONFIG.margin, 5.92, CONFIG.contentWidth, 0.60,
+    { fontSize: 26, color: C.muted });
+
+  B.line("Header divider",
+    CONFIG.margin, 6.65, CONFIG.width - CONFIG.margin, 6.65, C.line);
+
+  /* Subtle vertical dividers stay outside column text boxes. */
+  for (const x of [x2 - CONFIG.gutter / 2, x3 - CONFIG.gutter / 2]) {
+    B.line("Column divider", x, 6.98, x, 42.65, C.line);
+  }
+
+  /* ---------- Column 1: rationale and framework ---------- */
+
+  hd("Why heading", copy.whyHeading, x1, 7.05, cw);
+  tx("Why text", copy.why, x1, 8.30, cw, 2.65, { fontSize: 27 });
+
+  hd("Preparation heading", copy.preparationHeading,
+    x1, 11.65, cw);
+
+  copy.preparationSteps.forEach((step, i) => {
+    const y = 13.00 + i * 2.10;
+    B.rect("Preparation step card " + (i + 1),
+      x1, y, cw, 1.52, C.pale, C.line);
+
+    tx("Preparation step number " + (i + 1), String(i + 1),
+      x1 + 0.22, y + 0.29, 0.50, 0.62,
+      { fontSize: 30, bold: true, color: C.P });
+
+    tx("Preparation step " + (i + 1), step,
+      x1 + 0.95, y + 0.23, cw - 1.20, 1.05,
+      { fontSize: 27 });
+
+    if (i < copy.preparationSteps.length - 1) {
+      B.line("Preparation arrow " + (i + 1),
+        x1 + cw / 2, y + 1.62,
+        x1 + cw / 2, y + 1.98,
+        C.P, true);
+    }
+  });
+
+  tx("Preparation responsibility", copy.preparationNote,
+    x1, 21.55, cw, 2.10, { fontSize: 26 });
+
+  hd("Framework heading", copy.frameworkHeading,
+    x1, 24.10, cw);
+
+  copy.stages.forEach((stage, i) => {
+    const y = 25.50 + i * 3.80;
+    const color = C[stage.letter];
+    const pale = C["light" + stage.letter];
+
+    B.rect("SPOT card " + stage.letter,
+      x1, y, cw, 3.35, pale, pale);
+
+    B.rect("SPOT letter background " + stage.letter,
+      x1 + 0.22, y + 0.25, 0.90, 0.90, color, color);
+
+    tx("SPOT letter " + stage.letter, stage.letter,
+      x1 + 0.22, y + 0.34, 0.90, 0.68,
+      { fontSize: 36, bold: true, color: C.white, align: "center" });
+
+    tx("SPOT title " + stage.letter, stage.title,
+      x1 + 1.35, y + 0.24, cw - 1.60, 1.20,
+      { fontSize: 30, bold: true, color });
+
+    tx("SPOT description " + stage.letter, stage.body,
+      x1 + 1.35, y + 1.55, cw - 1.60, 1.55,
+      { fontSize: 26 });
+
+    if (i < copy.stages.length - 1) {
+      B.line("SPOT progression arrow " + stage.letter,
+        x1 + 0.67, y + 3.43,
+        x1 + 0.67, y + 3.69,
+        C.muted, true);
+    }
+  });
+
+  // A separate native return connector identifies this as a recurring framework.
+  B.line("Framework return right edge",
+    x1 + cw - 0.10, 40.48,
+    x1 + cw - 0.10, 40.76, C.muted);
+
+  tx("Framework implementation note",
+    "Recurring framework. " + copy.implementation,
+    x1, 40.95, cw, 1.65,
+    { fontSize: 24, color: C.muted });
+
+  /* ---------- Column 2: simulation and AI exchange ---------- */
+
+  hd("Evidence heading", copy.evidenceHeading, x2, 7.05, cw);
+
+  tx("Separate examples statement", copy.separateExamples,
+    x2, 8.25, cw, 1.45,
+    { fontSize: 26, color: C.muted });
+
+  hd("Simulation panel heading", copy.simulationHeading,
+    x2, 10.05, cw, C.S, 1.25);
+
+  B.image("Original projectile-motion simulation",
+    "simulationImage", x2 + 0.24, 11.70, inner, 7.00);
+
+  tx("Simulation caption", copy.captionSimulation,
+    x2 + 0.24, 19.05, inner, 1.85,
+    { fontSize: 26 });
+
+  B.badge("Simulation SPOT label", copy.simulationLabel,
+    x2 + 0.24, 21.10, inner, C.S, C.lightS);
+
+  B.line("Middle evidence divider",
+    x2, 22.15, x2 + cw, 22.15, C.line);
+
+  hd("AI panel heading", copy.aiHeading,
+    x2, 22.65, cw, C.P, 1.28);
+
+  B.image("Original classroom AI exchange",
+    "aiFeedbackImage", x2 + 0.24, 24.20, inner, 13.30);
+
+  tx("Authentic AI question quotation", copy.aiQuote,
+    x2 + 0.24, 37.85, inner, 1.55,
+    { fontSize: 30, bold: true, color: C.P });
+
+  tx("AI feedback caption", copy.captionAI,
+    x2 + 0.24, 39.60, inner, 2.10,
+    { fontSize: 26 });
+
+  B.badge("AI SPOT label", copy.aiLabel,
+    x2 + 0.24, 41.95, inner, C.P, C.lightP);
+
+  /* ---------- Column 3: diagnosis and revision ---------- */
+
+  hd("Error panel heading", copy.errorHeading,
+    x3, 7.05, cw, C.O);
+
+  B.image("Original Error Detective worksheet",
+    "errorDetectiveImage", x3 + 0.24, 8.30, inner, 5.60);
+
+  tx("Error Detective caption", copy.captionError,
+    x3 + 0.24, 14.15, inner, 1.50,
+    { fontSize: 26 });
+
+  // Equal-sized category labels — no implied percentages or frequency.
+  copy.categories.forEach((category, i) => {
+    B.badge("Diagnostic category " + (i + 1), category,
+      x3 + 0.24, 15.85 + i * 0.70, inner, C.O, C.lightO);
+  });
+
+  tx("Chat-record analysis note", copy.errorNote,
+    x3 + 0.24, 19.55, inner, 1.50,
+    { fontSize: 24, color: C.muted });
+
+  hd("Revision panel heading", copy.revisionHeading,
+    x3, 21.40, cw, C.T, 1.15);
+
+  tx("Initial model label", copy.initialLabel,
+    x3 + 0.24, 22.75, inner, 0.50,
+    { fontSize: 24, bold: true, color: C.T });
+
+  B.image("Original initial model from matched pair",
+    "initialModelImage", x3 + 0.24, 23.45, inner, 4.70);
+
+  tx("Revised model label", copy.revisedLabel,
+    x3 + 0.24, 28.35, inner, 0.50,
+    { fontSize: 24, bold: true, color: C.T });
+
+  B.image("Original revised model from matched pair",
+    "revisedModelImage", x3 + 0.24, 29.05, inner, 3.80);
+
+  tx("Revision caption", copy.captionRevision,
+    x3 + 0.24, 33.10, inner, 1.55,
+    { fontSize: 26 });
+
+  tx("Editable sign-convention equation", copy.equation,
+    x3 + 0.24, 34.90, inner, 0.65,
+    { fontSize: 27, bold: true, color: C.T });
+
+  tx("Revision evidence boundary", copy.revisionBoundary,
+    x3 + 0.24, 35.80, inner, 1.45,
+    { fontSize: 24, color: C.muted });
+
+  hd("Teacher follow-up heading", copy.followupHeading,
+    x3, 37.65, cw, C.navy, 1.10);
+
+  tx("Teacher follow-up description", copy.followup,
+    x3 + 0.24, 38.95, inner, 1.95,
+    { fontSize: 24 });
+
+  // Compact two-row native feedback-loop diagram:
+  // Attempts -> Error evidence
+  // Revision <- Teacher discussion
+  const nodeW = (inner - 0.60) / 2;
+  const nodeH = 0.64;
+  const left = x3 + 0.24;
+  const right = left + nodeW + 0.60;
+  const topY = 41.10;
+  const lowerY = 42.00;
+
+  [
+    [copy.followupSteps[0], left, topY],
+    [copy.followupSteps[1], right, topY],
+    [copy.followupSteps[2], right, lowerY],
+    [copy.followupSteps[3], left, lowerY]
+  ].forEach(([value, x, y], index) => {
+    B.rect("Feedback-loop node " + index,
+      x, y, nodeW, nodeH, C.pale, C.line);
+    tx("Feedback-loop text " + index, value,
+      x + 0.08, y + 0.08, nodeW - 0.16, 0.48,
+      { fontSize: 24, align: "center" });
+  });
+
+  B.line("Feedback-loop first arrow",
+    left + nodeW + 0.08, topY + nodeH / 2,
+    right - 0.08, topY + nodeH / 2, C.P, true);
+
+  B.line("Feedback-loop downward arrow",
+    right + nodeW / 2, topY + nodeH + 0.03,
+    right + nodeW / 2, lowerY - 0.03, C.P, true);
+
+  B.line("Feedback-loop revision arrow",
+    right - 0.08, lowerY + nodeH / 2,
+    left + nodeW + 0.08, lowerY + nodeH / 2, C.P, true);
+
+  /* ---------- Full-width footer ---------- */
+
+  B.rect("Footer background",
+    CONFIG.margin, 43.30, CONFIG.contentWidth, 2.60,
+    "EDF3FA", "EDF3FA");
+
+  tx("Main takeaway", copy.takeaway,
+    CONFIG.margin + 0.30, 43.57,
+    CONFIG.contentWidth - 0.60, 0.78,
+    { fontSize: 34, bold: true, color: C.navy });
+
+  tx("Responsibility statement", copy.responsibility,
+    CONFIG.margin + 0.30, 44.48,
+    CONFIG.contentWidth - 0.60, 0.60,
+    { fontSize: 26 });
+
+  tx("Evidence source and limits", copy.source,
+    CONFIG.margin + 0.30, 45.18,
+    CONFIG.contentWidth - 0.60, 0.60,
+    { fontSize: 20, color: C.muted });
+
+  return B.checkGeometry();
+}
+
+/* ==========================================================
+   8. EXPORT
+   ========================================================== */
+
+function currentCopy() {
+  return {
+    ...CONTENT,
+    captionSimulation: $("captionSimulation").value.trim(),
+    captionAI: $("captionAI").value.trim(),
+    captionError: $("captionError").value.trim(),
+    captionRevision: $("captionRevision").value.trim()
+  };
+}
+
+function setBusy(busy) {
+  state.busy = busy;
+  document.body.classList.toggle("busy", busy);
+
+  document.querySelectorAll(
+    "input, textarea, button, details"
+  ).forEach(node => {
+    if ("disabled" in node) node.disabled = busy;
+  });
+
+  $("retryLibrary").disabled = busy;
+  updateChecklist();
+}
+
+async function exportPoster() {
+  if (state.busy) return;
+  if (!state.libraryReady) {
+    setStatus("Load the PowerPoint library before exporting.", "error");
+    return;
+  }
+
+  const invalid = ASSET_SPECS.filter(spec =>
+    state.assets[spec.id].error
+  );
+
+  if (invalid.length) {
+    setStatus(
+      "Correct or remove these invalid images/crops before exporting:\n" +
+      invalid.map(spec =>
+        "• " + spec.title + ": " + state.assets[spec.id].error
+      ).join("\n"),
+      "error"
+    );
+    return;
+  }
+
+  const title = $("posterTitle").value.trim();
+  if (!title) {
+    setStatus("Please enter a poster title.", "error");
+    return;
+  }
+
+  const warnings = collectWarnings();
+
+  if (warnings.length) {
+    const accepted = window.confirm(
+      "Export warnings:\n\n" +
+      warnings.map(w => "• " + w).join("\n") +
+      "\n\nContinue with these warnings?"
+    );
+    if (!accepted) {
+      setStatus("Export cancelled. Update the metadata or evidence and try again.");
+      return;
+    }
+  }
+
+  const metadata = {
+    title,
+    author: $("author").value.trim() || "[Author — enter confirmed name]",
+    affiliation:
+      $("affiliation").value.trim() || "[Affiliation — enter confirmed institution]"
+  };
+
+  setBusy(true);
+  setStatus("Building native PowerPoint objects and checking layout…");
+
+  // Let the browser paint the busy state before constructing the slide.
+  await new Promise(resolve => setTimeout(resolve, 40));
+
+  try {
+    const pptx = new window.PptxGenJS();
+
+    pptx.defineLayout({
+      name: "A0_PORTRAIT",
+      width: CONFIG.width,
+      height: CONFIG.height
+    });
+    pptx.layout = "A0_PORTRAIT";
+
+    pptx.author = $("author").value.trim();
+    pptx.company = $("affiliation").value.trim();
+    pptx.title = metadata.title;
+    pptx.subject =
+      "Teacher-developed SPOT physics framework and classroom evidence";
+    pptx.lang = "en-GB";
+    pptx.revision = "1";
+    pptx.theme = {
+      headFontFace: CONFIG.font,
+      bodyFontFace: CONFIG.font,
+      lang: "en-GB"
+    };
+
+    const slide = pptx.addSlide();
+    const diagnostics = buildPoster(pptx, slide, currentCopy(), metadata);
+    state.diagnostics = diagnostics;
+
+    if (diagnostics.errors.length) {
+      throw new Error(
+        "Export stopped to protect readability and geometry:\n\n" +
+        diagnostics.errors.map(message => "• " + message).join("\n") +
+        "\n\nShorten edited text or adjust the relevant layout box in the code. " +
+        "Font sizes have not been reduced."
+      );
+    }
+
+    if (diagnostics.warnings.length) {
+      const accepted = window.confirm(
+        "Layout inspection warnings:\n\n" +
+        diagnostics.warnings.join("\n") +
+        "\n\nContinue and inspect the exported PowerPoint manually?"
+      );
+      if (!accepted) {
+        setStatus("Export cancelled after layout review.");
+        return;
+      }
+    }
+
+    setStatus("Creating the PPTX download…");
+
+    await pptx.writeFile({
+      fileName: CONFIG.filename,
+      compression: true
+    });
+
+    setStatus(
+      "PowerPoint download requested successfully.\n" +
+      `File: ${CONFIG.filename}\n` +
+      `Slide: 841 × 1189 mm, portrait; ${diagnostics.count} tracked objects.\n\n` +
+      "Open the PPTX and inspect text wrapping, equations, image crops and " +
+      "legibility. Native content remains editable; evidence images remain images.\n" +
+      "Use the final manual checklist before exporting a submission PDF.",
+      "success"
+    );
+
+  } catch (error) {
+    console.error(error);
+    setStatus(error.message || "PowerPoint export failed.", "error");
+  } finally {
+    setBusy(false);
+  }
+}
+
+/* ==========================================================
+   9. STARTUP
+   ========================================================== */
+
+initialiseInterface();
+loadLibrary();
+</script>
+</body>
+</html>
